@@ -1,0 +1,61 @@
+#!MC 1410
+
+## 首先设置坐标轴范围，否则后面的取点函数坐标错误
+
+$!TwoDAxis XDetail{RangeMin = -0.05}
+$!TwoDAxis XDetail{RangeMax = 0.35}
+$!TwoDAxis YDetail{RangeMin = -0.24}
+$!TwoDAxis YDetail{RangeMax = 0.16}
+
+###画线，这里画71个，从-10mm 画到 130 mm，间隔2mm， 起点x变化，y为0.11m，长度为0.31m
+
+$!AttachGeom 
+  AnchorPos
+    {
+    X = -0.0
+    Y = 0.11
+    }
+  RawData
+1
+2
+0 0 
+0 -0.310
+
+#Identify_Exrect_Remove
+### 识别画的线，x 按照函数0.01695*（x-（-10））+2.844913151确定，
+###x为mm为单位的绝对坐标-10为参考点，可以保证任意位置
+##Y的值任意给，随便在线上取一个
+
+$!Pick AddAtPosition
+  X = 3.014413151   
+  Y = 1.75868486352  
+  ConsiderStyle = Yes
+
+
+
+$!ExtendedCommand 
+  CommandProcessorID = 'Extract Over Time'
+  Command = 'ExtractGeomOverTime:3000'
+
+$!PICK CLEAR
+$!AttachGeom 
+  AnchorPos
+    {
+    X = 0.05
+    Y = 0.11
+    }
+  RawData
+1
+2
+0 0 
+0 -0.31 
+###相当于polyline向量，包含长度信息
+
+#最后输出
+
+$!ExtendedCommand 
+  CommandProcessorID = 'CFDAnalyzer4'
+  Command = 'Integrate [2-72] VariableOption=\'Average\' XOrigin=0 YOrigin=0 ZOrigin=0 ScalarVar=5 Absolute=\'F\' ExcludeBlanked=\'F\' XVariable=1 YVariable=2 ZVariable=3 IntegrateOver=\'Cells\' IntegrateBy=\'Zones\' IRange={MIN =1 MAX = 0 SKIP = 1} JRange={MIN =1 MAX = 0 SKIP = 1} KRange={MIN =1 MAX = 0 SKIP = 1} PlotResults=\'F\' PlotAs=\'Result\' TimeMin=0 TimeMax=0'
+$!ExtendedCommand 
+  CommandProcessorID = 'CFDAnalyzer4'
+  Command = 'SaveIntegrationResults FileName=\'/Volumes/KINGSTON/010A/NHFR/steps/test.txt\''
